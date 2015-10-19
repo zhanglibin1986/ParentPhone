@@ -3,8 +3,8 @@ package parent.com.parentphone.util;
 import android.util.SparseArray;
 import android.view.View;
 
-public class ViewHolder {
-	private ViewHolder() {
+public class CommonViewHolder {
+	private CommonViewHolder() {
 	}
 	public static <T extends View> T get(View view, int id) {
         SparseArray<View> viewHolder = (SparseArray<View>) view.getTag();

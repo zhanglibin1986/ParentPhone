@@ -1,7 +1,5 @@
 package parent.com.parentphone;
 
-import android.os.Bundle;
-
 /**
  * @author zhanglibin
  * @Project: ParentPhone
