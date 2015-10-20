@@ -24,29 +24,12 @@ import parent.com.parentphone.util.Utils;
  * @Description
  */
 public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
-    private Activity mActivity;
-    private QueryContactsCallback mCallback;
-    private List<ContactBean> mContactsBeans;
-    private boolean isLoadding;
     // The desired sort order for the returned Cursor. In Android 3.0 and later, the primary
     // sort key allows for localization. In earlier versions. use the display name as the sort
     // key.
     @SuppressLint("InlinedApi")
     final static String SORT_ORDER =
             Utils.hasHoneycomb() ? Contacts.SORT_KEY_PRIMARY : Contacts.DISPLAY_NAME;
-
-    /*
-     * Defines an array that contains column names to move from
-     * the Cursor to the ListView.
-     */
-    @SuppressLint("InlinedApi")
-    private final static String[] FROM_COLUMNS = {
-            Build.VERSION.SDK_INT
-                    >= Build.VERSION_CODES.HONEYCOMB ?
-                    Contacts.DISPLAY_NAME_PRIMARY :
-                    Contacts.DISPLAY_NAME
-    };
-
     // The selection clause for the CursorLoader query. The search criteria defined here
     // restrict results to contacts that have a display name and are linked to visible groups.
     // Notice that the search on the string provided by the user is implemented by appending
@@ -55,7 +38,6 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
     final static String SELECTION =
             (Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) +
                     "<>''" + " AND " + Contacts.IN_VISIBLE_GROUP + "=1";
-
     // The projection for the CursorLoader query. This is a list of columns that the Contacts
     // Provider should return in the Cursor.
     @SuppressLint("InlinedApi")
@@ -84,6 +66,21 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
             // The sort order column for the returned Cursor, used by the AlphabetIndexer
             SORT_ORDER,
     };
+    /*
+     * Defines an array that contains column names to move from
+     * the Cursor to the ListView.
+     */
+    @SuppressLint("InlinedApi")
+    private final static String[] FROM_COLUMNS = {
+            Build.VERSION.SDK_INT
+                    >= Build.VERSION_CODES.HONEYCOMB ?
+                    Contacts.DISPLAY_NAME_PRIMARY :
+                    Contacts.DISPLAY_NAME
+    };
+    private Activity mActivity;
+    private QueryContactsCallback mCallback;
+    private List<ContactBean> mContactsBeans;
+    private boolean isLoadding;
 
     public ContactsModel(Activity activity) {
         this.mActivity = activity;
@@ -92,14 +89,15 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
 
     /**
      * 很重要的一个方法，获取联系人
+     *
      * @param callback
      */
     public void requestContactsBeans(QueryContactsCallback callback) {
         mCallback = callback;
-        if(mContactsBeans != null) {
+        if (mContactsBeans != null) {
             callback.onResult(mContactsBeans);
         } else {
-            if(!isLoadding) {
+            if (!isLoadding) {
                 mActivity.getLoaderManager().initLoader(0, null, this);
             } else {
                 callback.onLoading("正在加载");
@@ -116,21 +114,25 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         isLoadding = false;
-        if(cursor != null && cursor.getCount() > 0) {
+        if (cursor != null && cursor.getCount() > 0) {
             cursor.moveToFirst();
-            if(mContactsBeans == null) {
+            if (mContactsBeans == null) {
                 mContactsBeans = new ArrayList<>();
             }
-            while(!cursor.isAfterLast()) {
+            while (!cursor.isAfterLast()) {
                 final String photoUri = cursor.getString(cursor.getColumnIndex(Contacts.PHOTO_THUMBNAIL_URI));
                 final String name = cursor.getString(cursor.getColumnIndex(Contacts.DISPLAY_NAME_PRIMARY));
+                final String lookupKey = cursor.getString(cursor.getColumnIndex(Contacts.LOOKUP_KEY));
+                final String id = cursor.getString(cursor.getColumnIndex(Contacts._ID));
                 ContactBean bean = new ContactBean();
                 bean.setName(name);
                 bean.setPhoto(photoUri);
+                bean.setLookupKey(lookupKey);
+                bean.setId(id);
                 mContactsBeans.add(bean);
                 cursor.moveToNext();
             }
-            if(mCallback != null) {
+            if (mCallback != null) {
                 mCallback.onResult(mContactsBeans);
             }
         }
@@ -143,6 +145,7 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public interface QueryContactsCallback {
         public void onResult(List<ContactBean> contactBeans);
+
         public void onLoading(String msg);
     }
 }

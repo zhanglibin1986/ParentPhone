@@ -12,7 +12,11 @@
         android:id="@+id/text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/photo"
-        android:clickable="true"
+        android:layout_alignBottom="@id/photo"
+        android:maxLines="2"
+        android:gravity="center"
+        android:background="@drawable/half_white_bg"
+        android:textSize="24sp"
+        android:text="测试文字"
         />
 </RelativeLayout>

@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.List;
@@ -28,10 +29,12 @@ public class ContactsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private Activity mActivity;
     private ImageLoader mImageLoader;// Handles loading the contact image in a background thread
     private int mImageThumbSize;
+    private ContactsUiController mController;
 
-    public ContactsListAdapter(Activity activity, List<ContactBean> data) {
-        inflater = LayoutInflater.from(activity);
+    public ContactsListAdapter(Activity activity, ContactsUiController controller, List<ContactBean> data) {
         mActivity = activity;
+        mController = controller;
+        inflater = LayoutInflater.from(activity);
         this.mData = data;
         mImageThumbSize = (int)1.0 * Utils.getScreenWidth(mActivity) / 2;
 
@@ -77,11 +80,18 @@ public class ContactsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ContactViewHolder contactViewHolder = (ContactViewHolder) holder;
-        ContactBean bean = mData.get(position);
+        final ContactBean bean = mData.get(position);
         contactViewHolder.photo.getLayoutParams().height = mImageThumbSize;
         contactViewHolder.photo.getLayoutParams().width = mImageThumbSize;
         mImageLoader.loadImage(bean.getPhoto(), contactViewHolder.photo);
         contactViewHolder.name.setText(bean.getName());
+        final View target = contactViewHolder.itemView;
+        contactViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mController.onContactListItemClicked(bean, target);
+            }
+        });
     }
 
     @Override

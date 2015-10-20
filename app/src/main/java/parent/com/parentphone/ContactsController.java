@@ -1,6 +1,10 @@
 package parent.com.parentphone;
 
 import android.app.Activity;
+import android.net.Uri;
+import android.provider.ContactsContract;
+import android.view.View;
+import android.widget.QuickContactBadge;
 
 import java.util.List;
 
@@ -17,6 +21,17 @@ public class ContactsController implements ContactsActivityController, ContactsU
     private Activity mActivity;
     private ContactsUi mUi;
     private ContactsModel mModel;
+
+    @Override
+    public void onContactListItemClicked(ContactBean bean, View target) {
+        final Uri contactUri = ContactsContract.Contacts.getLookupUri(
+                Long.valueOf(bean.getId()),
+                bean.getLookupKey());
+        if (contactUri != null) {
+            ContactsContract.QuickContact.showQuickContact(mActivity, target, contactUri,
+                    ContactsContract.QuickContact.MODE_LARGE, null);
+        }
+    }
 
     public ContactsController(Activity activity) {
         mActivity = activity;

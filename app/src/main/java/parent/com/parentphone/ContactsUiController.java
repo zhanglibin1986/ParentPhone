@@ -1,5 +1,9 @@
 package parent.com.parentphone;
 
+import android.view.View;
+
+import parent.com.parentphone.bean.ContactBean;
+
 /**
  * @author zhanglibin
  * @Project: ParentPhone
@@ -8,5 +12,9 @@ package parent.com.parentphone;
  * @Description
  */
 public interface ContactsUiController {
-
+    /**
+     * Click the contact list item.
+     * @param bean
+     */
+    public void onContactListItemClicked(ContactBean bean, View target);
 }

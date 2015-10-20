@@ -46,7 +46,7 @@ public class ContactsUi {
     }
 
     private void initAdapter(List<ContactBean> data) {
-        mAdapter = new ContactsListAdapter(mActivity, data);
+        mAdapter = new ContactsListAdapter(mActivity, mController, data);
     }
 
     private void initRecyclerView() {
@@ -79,7 +79,7 @@ public class ContactsUi {
     /**
      * 图片之间的间距，单位是dp
      */
-    private static final int IMAGE_PADDING = 10;
+    private static final int IMAGE_PADDING = 4;
     public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
         int padding = Utils.dp2px(mActivity, IMAGE_PADDING);
 

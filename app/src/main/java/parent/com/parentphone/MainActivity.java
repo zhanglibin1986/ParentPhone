@@ -1,9 +1,14 @@
 package parent.com.parentphone;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
     private ContactsActivityController mActivityController;
 
     @Override
@@ -40,5 +45,19 @@ public class MainActivity extends Activity {
         ContactsController controller = new ContactsController(this);
         return (ContactsActivityController) controller;
     }
+
+    @Override
+    public boolean onSearchRequested() {
+        return super.onSearchRequested();
+    }
+
+//    // This method uses APIs from newer OS versions than the minimum that this app supports. This
+//    // annotation tells Android lint that they are properly guarded so they won't run on older OS
+//    // versions and can be ignored by lint.
+//    @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
+//    @Override
+//    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+//
+//    }
 }
 
