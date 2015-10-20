@@ -1,5 +1,8 @@
 package parent.com.parentphone;
 
+import android.view.Menu;
+import android.view.MenuItem;
+
 /**
  * @author zhanglibin
  * @Project: ParentPhone
@@ -15,4 +18,8 @@ public interface ContactsActivityController {
     public void onStop();
 
     public void onDestroy();
+
+    public boolean onCreateOptionsMenu(Menu menu);
+
+    public boolean onOptionsItemSelected(MenuItem item);
 }

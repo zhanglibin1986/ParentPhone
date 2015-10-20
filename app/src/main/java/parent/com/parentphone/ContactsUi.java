@@ -21,17 +21,20 @@ import parent.com.parentphone.util.Utils;
  * @Description
  */
 public class ContactsUi {
+    /**
+     * 每行的图片数量
+     */
+    private static final int ROW_COUNT = 2;
+    /**
+     * 图片之间的间距，单位是dp
+     */
+    private static final int IMAGE_PADDING = 4;
     private Activity mActivity;
     private ContactsUiController mController;
     private View mRootView;//根布局
     private RecyclerView mRecyclerView;
     private List<ContactBean> mData;
     private ContactsListAdapter mAdapter;
-    /**
-     * 每行的图片数量
-     */
-    private static final int ROW_COUNT = 2;
-
 
     public ContactsUi(Activity activity, ContactsUiController controller) {
         this.mActivity = activity;
@@ -55,17 +58,6 @@ public class ContactsUi {
 
             @Override
             public int getSpanSize(int position) {
-//                if(mSelectAdapter == null || mSelectAdapter.getData() == null || mSelectAdapter.getData().isEmpty()) {
-//                    return 0;
-//                }
-//                ILifeSelectItem item = mSelectAdapter.getData().get(position);
-//
-//                if(item == null) {
-//                    return ROW_COUNT;
-//                }
-//                if(item.getType() == ILifeSelectItem.TYPE_IMG) {
-//                    return 1;
-//                }
                 return 1;
             }
         };
@@ -77,9 +69,15 @@ public class ContactsUi {
     }
 
     /**
-     * 图片之间的间距，单位是dp
+     * @param data
      */
-    private static final int IMAGE_PADDING = 4;
+    public void setDataAndShow(@Nullable List<ContactBean> data) {
+        mData = data;
+        initAdapter(mData);
+        initRecyclerView();
+        mRecyclerView.setAdapter(mAdapter);
+    }
+
     public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
         int padding = Utils.dp2px(mActivity, IMAGE_PADDING);
 
@@ -105,16 +103,5 @@ public class ContactsUi {
                     break;
             }
         }
-    }
-
-    /**
-     *
-     * @param data
-     */
-    public void setDataAndShow(@Nullable List<ContactBean> data) {
-        mData = data;
-        initAdapter(mData);
-        initRecyclerView();
-        mRecyclerView.setAdapter(mAdapter);
     }
 }

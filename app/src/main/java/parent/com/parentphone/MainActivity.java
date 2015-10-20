@@ -1,12 +1,12 @@
 package parent.com.parentphone;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.os.Build;
+import android.app.ActionBar;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
-import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private ContactsActivityController mActivityController;
@@ -59,5 +59,16 @@ public class MainActivity extends AppCompatActivity {
 //    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 //
 //    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return mActivityController.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        return mActivityController.onOptionsItemSelected(item);
+    }
 }
 
