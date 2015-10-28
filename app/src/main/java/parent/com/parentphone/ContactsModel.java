@@ -9,11 +9,14 @@ import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract.Contacts;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import parent.com.parentphone.bean.ContactBean;
+import parent.com.parentphone.util.LogUtil;
 import parent.com.parentphone.util.Utils;
 
 /**
@@ -79,12 +82,16 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
     };
     private Activity mActivity;
     private QueryContactsCallback mCallback;
-    private List<ContactBean> mContactsBeans;
+    private ContactsListData mListData;
     private boolean isLoadding;
 
     public ContactsModel(Activity activity) {
         this.mActivity = activity;
+        mListData = new ContactsListData();
+    }
 
+    public void requestContactsBeans(QueryContactsCallback callback) {
+        requestContactsBeans(callback, null);
     }
 
     /**
@@ -92,22 +99,57 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
      *
      * @param callback
      */
-    public void requestContactsBeans(QueryContactsCallback callback) {
+    public void requestContactsBeans(QueryContactsCallback callback, ContactsOption option) {
         mCallback = callback;
-        if (mContactsBeans != null) {
-            callback.onResult(mContactsBeans);
+        if(option == null) {
+            option = ContactsOption.getInstance();
+        }
+        if (mListData != null && mListData.getData() != null && mListData.getOption().equals(option)) {
+            callback.onResult(mListData.getData());
         } else {
+            if(mListData.getData() != null && !mListData.getData().isEmpty()) {//restart loader.
+                LogUtil.logM("restartLoader");
+                mActivity.getLoaderManager().restartLoader(0, null, this);
+            }
             if (!isLoadding) {
+                LogUtil.logM("initLoader");
                 mActivity.getLoaderManager().initLoader(0, null, this);
-            } else {
-                callback.onLoading("正在加载");
             }
         }
     }
 
+    /**
+     *
+     */
+    public static final class ContactsOption {
+        public static ContactsOption getInstance() {
+            return new ContactsOption();
+        }
+        public boolean isOnlyContactWithPhoto = false;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ContactsOption that = (ContactsOption) o;
+            return Objects.equals(isOnlyContactWithPhoto, that.isOnlyContactWithPhoto);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(isOnlyContactWithPhoto);
+        }
+    }
+
+
+
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
+        LogUtil.logM("-----onCreateLoader");
         isLoadding = true;
+        if(mCallback != null) {
+            mCallback.onLoading("");
+        }
         return new CursorLoader(mActivity, Contacts.CONTENT_URI, PROJECTION, SELECTION, null, SORT_ORDER);
     }
 
@@ -116,8 +158,8 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
         isLoadding = false;
         if (cursor != null && cursor.getCount() > 0) {
             cursor.moveToFirst();
-            if (mContactsBeans == null) {
-                mContactsBeans = new ArrayList<>();
+            if (mListData.getData() == null) {
+                mListData.setData(new ArrayList<ContactBean>());
             }
             while (!cursor.isAfterLast()) {
                 final String photoUri = cursor.getString(cursor.getColumnIndex(Contacts.PHOTO_THUMBNAIL_URI));
@@ -129,11 +171,11 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
                 bean.setPhoto(photoUri);
                 bean.setLookupKey(lookupKey);
                 bean.setId(id);
-                mContactsBeans.add(bean);
+                mListData.getData().add(bean);
                 cursor.moveToNext();
             }
             if (mCallback != null) {
-                mCallback.onResult(mContactsBeans);
+                mCallback.onResult(mListData.getData());
             }
         }
     }
@@ -144,8 +186,16 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     public interface QueryContactsCallback {
+        /**
+         * request data result callback
+         * @param contactBeans
+         */
         public void onResult(List<ContactBean> contactBeans);
 
+        /**
+         * loading data
+         * @param msg
+         */
         public void onLoading(String msg);
     }
 }
