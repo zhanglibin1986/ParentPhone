@@ -16,7 +16,8 @@
         android:maxLines="2"
         android:gravity="center"
         android:background="@drawable/half_white_bg"
-        android:textSize="24sp"
+        android:textSize="28sp"
         android:text="测试文字"
+        android:textColor="@android:color/black"
         />
 </RelativeLayout>

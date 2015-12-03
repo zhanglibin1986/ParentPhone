@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract.Contacts;
 import android.util.Log;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -41,8 +42,15 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
     final static String SELECTION =
             (Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) +
                     "<>''" + " AND " + Contacts.IN_VISIBLE_GROUP + "=1";
+
+    final static String SELECTION_NO_PHOTO = (Utils.hasHoneycomb() ? Contacts.DISPLAY_NAME_PRIMARY : Contacts.DISPLAY_NAME) +
+            "<>''" + " AND " + Contacts.IN_VISIBLE_GROUP + "=1" + " AND " + Contacts.PHOTO_THUMBNAIL_URI + " NOT NULL";
+
     // The projection for the CursorLoader query. This is a list of columns that the Contacts
     // Provider should return in the Cursor.
+
+    final static String BUNDLER_KEY_OPTION = "option";
+
     @SuppressLint("InlinedApi")
     final static String[] PROJECTION = {
 
@@ -83,7 +91,7 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
     private Activity mActivity;
     private QueryContactsCallback mCallback;
     private ContactsListData mListData;
-    private boolean isLoadding;
+    private boolean isLoadding;//是否正在请求数据
 
     public ContactsModel(Activity activity) {
         this.mActivity = activity;
@@ -104,16 +112,23 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
         if(option == null) {
             option = ContactsOption.getInstance();
         }
+        //如果上次请求和本次请求参数相同，且有缓存数据的情况，则使用缓存数据，不再请求
         if (mListData != null && mListData.getData() != null && mListData.getOption().equals(option)) {
             callback.onResult(mListData.getData());
         } else {
+            Bundle bundle = null;
+            if(!option.isEmpty()) {
+                bundle = new Bundle();
+                bundle.putSerializable(BUNDLER_KEY_OPTION, option);
+            }
+
             if(mListData.getData() != null && !mListData.getData().isEmpty()) {//restart loader.
                 LogUtil.logM("restartLoader");
-                mActivity.getLoaderManager().restartLoader(0, null, this);
+                mActivity.getLoaderManager().restartLoader(0, bundle, this);
             }
             if (!isLoadding) {
                 LogUtil.logM("initLoader");
-                mActivity.getLoaderManager().initLoader(0, null, this);
+                mActivity.getLoaderManager().initLoader(0, bundle, this);
             }
         }
     }
@@ -121,10 +136,14 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
     /**
      *
      */
-    public static final class ContactsOption {
+    public static final class ContactsOption implements Serializable {
         public static ContactsOption getInstance() {
             return new ContactsOption();
         }
+
+        /**
+         * 是否只请求有头像的数据
+         */
         public boolean isOnlyContactWithPhoto = false;
 
         @Override
@@ -133,6 +152,14 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
             if (o == null || getClass() != o.getClass()) return false;
             ContactsOption that = (ContactsOption) o;
             return Objects.equals(isOnlyContactWithPhoto, that.isOnlyContactWithPhoto);
+        }
+
+        /**
+         * 判断option是否有数据
+         * @return
+         */
+        public boolean isEmpty() {
+            return !isOnlyContactWithPhoto;
         }
 
         @Override
@@ -145,16 +172,32 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
 
     @Override
     public Loader onCreateLoader(int id, Bundle args) {
-        LogUtil.logM("-----onCreateLoader");
+        LogUtil.logM("-----onCreateLoader args = " + args);
         isLoadding = true;
         if(mCallback != null) {
             mCallback.onLoading("");
         }
-        return new CursorLoader(mActivity, Contacts.CONTENT_URI, PROJECTION, SELECTION, null, SORT_ORDER);
+        String selection = null;
+        if(args == null) {
+            selection = SELECTION;
+        } else {
+            if(args.getSerializable(BUNDLER_KEY_OPTION) != null) {
+                ContactsOption option = (ContactsOption) args.getSerializable(BUNDLER_KEY_OPTION);
+                selection = option.isOnlyContactWithPhoto ? SELECTION_NO_PHOTO : SELECTION;
+            } else {
+                selection = SELECTION;
+            }
+        }
+
+        return new CursorLoader(mActivity, Contacts.CONTENT_URI, PROJECTION, selection, null, SORT_ORDER);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        LogUtil.logM("-----onLoadFinished");
+        if(cursor != null) {
+            LogUtil.logM("cursor count = " + cursor.getCount());
+        }
         isLoadding = false;
         if (cursor != null && cursor.getCount() > 0) {
             cursor.moveToFirst();
@@ -171,6 +214,8 @@ public class ContactsModel implements LoaderManager.LoaderCallbacks<Cursor> {
                 bean.setPhoto(photoUri);
                 bean.setLookupKey(lookupKey);
                 bean.setId(id);
+                LogUtil.logM("photoUri = " + photoUri);
+                LogUtil.logM("id = " + id + " , name = " + name + " , lookupKey = " + lookupKey);
                 mListData.getData().add(bean);
                 cursor.moveToNext();
             }

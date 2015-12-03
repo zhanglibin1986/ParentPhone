@@ -28,7 +28,9 @@ public class ContactsController implements ContactsActivityController, ContactsU
         mActivity = activity;
         mUi = new ContactsUi(mActivity, this);
         mModel = new ContactsModel(mActivity);
-        mModel.requestContactsBeans(this);
+        ContactsModel.ContactsOption option = ContactsModel.ContactsOption.getInstance();
+        option.isOnlyContactWithPhoto = true;
+        mModel.requestContactsBeans(this, option);
     }
 
     @Override
