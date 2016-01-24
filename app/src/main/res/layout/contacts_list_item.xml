@@ -1,23 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content" android:layout_height="wrap_content"
+
+
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    card_view:cardCornerRadius="4dp"
     >
-    <ImageView
-        android:id="@+id/photo"
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
-        />
-    <TextView
-        android:id="@+id/text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@id/photo"
-        android:maxLines="2"
-        android:gravity="center"
-        android:background="@drawable/half_white_bg"
-        android:textSize="28sp"
-        android:text="测试文字"
-        android:textColor="@android:color/black"
-        />
-</RelativeLayout>
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/photo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@id/photo"
+            android:background="@drawable/half_white_bg"
+            android:gravity="center"
+            android:maxLines="2"
+            android:text="测试文字"
+            android:textColor="@android:color/black"
+            android:textSize="28sp" />
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

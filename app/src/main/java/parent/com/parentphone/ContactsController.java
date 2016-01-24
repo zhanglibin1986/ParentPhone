@@ -3,6 +3,7 @@ package parent.com.parentphone;
 import android.app.Activity;
 import android.net.Uri;
 import android.provider.ContactsContract;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,11 +21,11 @@ import parent.com.parentphone.bean.ContactBean;
  * @Description
  */
 public class ContactsController implements ContactsActivityController, ContactsUiController, ContactsModel.QueryContactsCallback {
-    private Activity mActivity;
+    private AppCompatActivity mActivity;
     private ContactsUi mUi;
     private ContactsModel mModel;
 
-    public ContactsController(Activity activity) {
+    public ContactsController(AppCompatActivity activity) {
         mActivity = activity;
         mUi = new ContactsUi(mActivity, this);
         mModel = new ContactsModel(mActivity);
@@ -85,12 +86,12 @@ public class ContactsController implements ContactsActivityController, ContactsU
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.menu_all:
-
-                break;
-            case R.id.menu_has_photo:
-
-                break;
+//            case R.id.menu_all:
+//
+//                break;
+//            case R.id.menu_has_photo:
+//
+//                break;
             case R.id.menu_settings:
                 Toast.makeText(mActivity, "To be continue", Toast.LENGTH_SHORT).show();
                 break;
